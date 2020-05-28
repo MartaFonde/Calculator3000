@@ -1,6 +1,8 @@
 package app;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicBorders.RadioButtonBorder;
+
 import java.awt.event.*;
 import java.io.*;
 import java.util.Scanner;
@@ -27,6 +29,7 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
     private File archivo = new File(home+"/.operacion.txt");
     private boolean operacionCorrecta = true;
     private boolean conversionCorrecta = true;
+    private SimboloOperacion op = new SimboloOperacion();
 
 
     public Operacion() {
@@ -122,33 +125,25 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
         
         if (conversion()) {
             operacionCorrecta = true;
-            for (Component c : this.getContentPane().getComponents()) {
-                if (c.getClass() == JRadioButton.class) {
-                    if (((JRadioButton) c).isSelected()) {
-                        if (c == rdbSuma) {
-                            rdo = n1 + n2;
-                        }
-                        if (c == rdbResta) {
-                            rdo = n1 - n2;
-                        }
-                        if (c == rdbMultiplicacion) {
-                            rdo = n1 * n2;
-                        }
-                        if (c == rdbDivision) {
-                            if (n2 != 0) {
-                                rdo = n1 / n2;
-                            } else {
-                                operacionCorrecta = false;
-                                lblError.setText("Non se pode dividir entre 0");
-                                lblError.setSize(lblError.getPreferredSize());
-                            }
-                        }
-                        if(operacionCorrecta){
-                            lblRdo.setText(String.format("= %." + decimal + "f", rdo));
-                            lblRdo.setSize(lblRdo.getPreferredSize());
-                        }
+            switch(lblSimbolo.getText()){
+                case "+": rdo = n1 + n2;
+                    break;
+                case "-": rdo = n1 - n2;
+                    break;
+                case "x": rdo = n1 * n2;
+                    break;
+                case "÷": 
+                    if (n2 != 0) {
+                        rdo = n1 / n2;
+                    } else {
+                        operacionCorrecta = false;
+                        lblError.setText("Non se pode dividir entre 0");
+                        lblError.setSize(lblError.getPreferredSize());
                     }
-                }
+            }
+            if(operacionCorrecta){
+                lblRdo.setText(String.format("= %." + decimal + "f", rdo));
+                lblRdo.setSize(lblRdo.getPreferredSize());
             }
         }
     }
@@ -170,10 +165,6 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
                     }
                     txf2.setText(sc.nextLine());
                     conversion();
-                    // lblRdo.setText(sc.nextLine());
-                    // rdo = Double.parseDouble(lblRdo.getText().substring(3));
-                    // lblRdo.setSize(lblRdo.getPreferredSize());
-                    //cmbDecimal.setSelectedIndex(0);
                 }
             }catch(IOException e){
                 JOptionPane.showMessageDialog(null, "Non se poden ler os datos"+e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -200,18 +191,7 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-            if (e.getSource() == rdbSuma) {
-                lblSimbolo.setText("+");
-            }
-            if (e.getSource() == rdbResta) {
-                lblSimbolo.setText("-");
-            }
-            if (e.getSource() == rdbMultiplicacion) {
-                lblSimbolo.setText("x");
-            }
-            if (e.getSource() == rdbDivision) {
-                lblSimbolo.setText("÷");
-            }
+            lblSimbolo.setText(op.simbolo(((JRadioButton)e.getSource())));
             lblRdo.setText("=");
         }
     }
@@ -219,7 +199,6 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
     class CierreVentana extends WindowAdapter {
         int num1;
         int num2;
-        //int resultado;
 
         @Override
         public void windowClosing(WindowEvent e) {
@@ -227,20 +206,17 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
             try{
                 correcto = true;
                 num1 = (int)n1;
-                num2 = (int)n2;
-                //resultado = (int)rdo;
-                
+                num2 = (int)n2;                
             } catch (NumberFormatException excep){
                 correcto = false;
                 JOptionPane.showMessageDialog(null, "Datos non válidos: "+excep.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
             
-            if(correcto && conversionCorrecta /*&& operacionCorrecta*/){
+            if(correcto && conversionCorrecta){
                 try (PrintWriter f = new PrintWriter(new FileWriter(archivo, false))) {
                     f.println(num1);
                     f.println(lblSimbolo.getText());
                     f.println(num2);
-                    //f.println(" = "+resultado);
                 } catch (IOException excep) {
                     JOptionPane.showMessageDialog(null, "Non se poideron gardar aos datos: "+excep.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 }

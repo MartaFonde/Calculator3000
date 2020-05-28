@@ -16,21 +16,19 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
     private JLabel lblSimbolo;
     private JLabel lblRdo;
     private double rdo;
-    private JRadioButton rdbSuma;
-    private JRadioButton rdbResta;
-    private JRadioButton rdbMultiplicacion;
-    private JRadioButton rdbDivision;
+    private RdbSimbol rdbSuma;
+    private RdbSimbol rdbResta;
+    private RdbSimbol rdbMultiplicacion;
+    private RdbSimbol rdbDivision;
     private ButtonGroup grpOperaciones;
     private JButton btnOperacion;
     private JLabel lblError;
     private JComboBox<Integer> cmbDecimal;
     private JLabel lblDec;
     private String home = System.getProperty("user.home");
-    private File archivo = new File(home+"/.operacion.txt");
+    private File archivo = new File(home + "/.operacion.txt");
     private boolean operacionCorrecta = true;
     private boolean conversionCorrecta = true;
-    private SimboloOperacion op = new SimboloOperacion();
-
 
     public Operacion() {
         super("Calculator 3000");
@@ -56,25 +54,25 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
         lblRdo.setLocation(300, 20);
         add(lblRdo);
 
-        rdbSuma = new JRadioButton("Suma");
+        rdbSuma = new RdbSimbol("Suma", "+");
         rdbSuma.setSize(rdbSuma.getPreferredSize());
         rdbSuma.setLocation(20, 50);
         rdbSuma.addItemListener(this);
         add(rdbSuma);
 
-        rdbResta = new JRadioButton("Resta");
+        rdbResta = new RdbSimbol("Resta", "-");
         rdbResta.setSize(rdbResta.getPreferredSize());
         rdbResta.setLocation(90, 50);
         rdbResta.addItemListener(this);
         add(rdbResta);
 
-        rdbMultiplicacion = new JRadioButton("Multiplicación");
+        rdbMultiplicacion = new RdbSimbol("Multiplicación", "x");
         rdbMultiplicacion.setSize(rdbMultiplicacion.getPreferredSize());
         rdbMultiplicacion.setLocation(170, 50);
         rdbMultiplicacion.addItemListener(this);
         add(rdbMultiplicacion);
 
-        rdbDivision = new JRadioButton("División");
+        rdbDivision = new RdbSimbol("División", "÷");
         rdbDivision.setSize(rdbDivision.getPreferredSize());
         rdbDivision.setLocation(300, 50);
         rdbDivision.addItemListener(this);
@@ -108,7 +106,7 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
         cmbDecimal.setLocation(200, 100);
         cmbDecimal.setSelectedIndex(2);
         add(cmbDecimal);
-        
+
         lblDec = new JLabel("Número de decimais");
         lblDec.setSize(lblDec.getPreferredSize());
         lblDec.setLocation(50, 105);
@@ -119,20 +117,31 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
     }
 
     @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            lblSimbolo.setText(((RdbSimbol) e.getSource()).operacion);
+            lblRdo.setText("=");
+        }
+    }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
         lblError.setText("");
         int decimal = Integer.parseInt(cmbDecimal.getSelectedItem().toString());
-        
+
         if (conversion()) {
             operacionCorrecta = true;
-            switch(lblSimbolo.getText()){
-                case "+": rdo = n1 + n2;
+            switch (lblSimbolo.getText()) {
+                case "+":
+                    rdo = n1 + n2;
                     break;
-                case "-": rdo = n1 - n2;
+                case "-":
+                    rdo = n1 - n2;
                     break;
-                case "x": rdo = n1 * n2;
+                case "x":
+                    rdo = n1 * n2;
                     break;
-                case "÷": 
+                case "÷":
                     if (n2 != 0) {
                         rdo = n1 / n2;
                     } else {
@@ -141,38 +150,43 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
                         lblError.setSize(lblError.getPreferredSize());
                     }
             }
-            if(operacionCorrecta){
+            if (operacionCorrecta) {
                 lblRdo.setText(String.format("= %." + decimal + "f", rdo));
                 lblRdo.setSize(lblRdo.getPreferredSize());
             }
         }
     }
-    
-    public void valoresIniciales(){
-        if(archivo.exists()){
-            try(Scanner sc = new Scanner(archivo)){
-                while(sc.hasNext()){
+
+    public void valoresIniciales() {
+        if (archivo.exists()) {
+            try (Scanner sc = new Scanner(archivo)) {
+                while (sc.hasNext()) {
                     txf1.setText(sc.nextLine());
                     lblSimbolo.setText(sc.nextLine());
-                    switch(lblSimbolo.getText()){
-                        case "+": rdbSuma.setSelected(true);
+                    switch (lblSimbolo.getText()) {
+                        case "+":
+                            rdbSuma.setSelected(true);
                             break;
-                        case "-": rdbResta.setSelected(true);
+                        case "-":
+                            rdbResta.setSelected(true);
                             break;
-                        case "x": rdbMultiplicacion.setSelected(true);
+                        case "x":
+                            rdbMultiplicacion.setSelected(true);
                             break;
-                        case "÷": rdbDivision.setSelected(true);
+                        case "÷":
+                            rdbDivision.setSelected(true);
                     }
                     txf2.setText(sc.nextLine());
                     conversion();
                 }
-            }catch(IOException e){
-                JOptionPane.showMessageDialog(null, "Non se poden ler os datos"+e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Non se poden ler os datos" + e.getMessage(), "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    public boolean conversion(){
+    public boolean conversion() {
         boolean correcto = true;
         try {
             conversionCorrecta = true;
@@ -187,15 +201,6 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
         return correcto;
     }
 
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        if (e.getStateChange() == ItemEvent.SELECTED) {
-            lblSimbolo.setText(op.simbolo(((JRadioButton)e.getSource())));
-            lblRdo.setText("=");
-        }
-    }
-
     class CierreVentana extends WindowAdapter {
         int num1;
         int num2;
@@ -203,22 +208,24 @@ public class Operacion extends JFrame implements ActionListener, ItemListener {
         @Override
         public void windowClosing(WindowEvent e) {
             boolean correcto = true;
-            try{
+            try {
                 correcto = true;
-                num1 = (int)n1;
-                num2 = (int)n2;                
-            } catch (NumberFormatException excep){
+                num1 = (int) n1;
+                num2 = (int) n2;
+            } catch (NumberFormatException excep) {
                 correcto = false;
-                JOptionPane.showMessageDialog(null, "Datos non válidos: "+excep.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Datos non válidos: " + excep.getMessage(), "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
-            
-            if(correcto && conversionCorrecta){
+
+            if (correcto && conversionCorrecta) {
                 try (PrintWriter f = new PrintWriter(new FileWriter(archivo, false))) {
                     f.println(num1);
                     f.println(lblSimbolo.getText());
                     f.println(num2);
                 } catch (IOException excep) {
-                    JOptionPane.showMessageDialog(null, "Non se poideron gardar aos datos: "+excep.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Non se poideron gardar aos datos: " + excep.getMessage(),
+                            "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }
